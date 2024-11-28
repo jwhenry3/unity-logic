@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Src.Logic.Cameras;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -25,6 +26,8 @@ namespace Src.Logic.Player
             if (agent == null)
                 agent = GetComponent<NavMeshAgent>();
             agent.speed = moveSpeed;
+            CameraTarget cameraTarget = FindFirstObjectByType<CameraTarget>();
+            cameraTarget.target = transform;
         }
 
 

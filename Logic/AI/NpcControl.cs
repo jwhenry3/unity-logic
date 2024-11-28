@@ -23,6 +23,8 @@ namespace Src.Logic.AI
         public NavMeshAgent agent;
         private Vector3 _startingPosition;
 
+        private bool isMoving;
+
         private void Start()
         {
             if (agent == null)
@@ -35,6 +37,7 @@ namespace Src.Logic.AI
 
         private void Update()
         {
+            isMoving = agent.velocity.magnitude > 0.15f;
             if (!canMove || !canWander)
             {
                 wanderTimer = 0;
@@ -80,7 +83,8 @@ namespace Src.Logic.AI
 
         private void UpdateWander()
         {
-            wanderTimer += Time.deltaTime;
+            if (!isMoving)
+                wanderTimer += Time.deltaTime;
             if (!(wanderTimer >= wanderInterval) || wanderInterval <= Time.deltaTime) return;
 
             wanderTimer = 0;
