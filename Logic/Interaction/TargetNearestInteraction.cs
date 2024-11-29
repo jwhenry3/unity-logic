@@ -16,7 +16,6 @@ namespace Src.Logic.Interaction
 
         public void OnTriggerEnter(Collider other)
         {
-            Debug.Log(other.name);
             if (targetContainer.target != null) return;
             targetContainer.SetTarget(targetContainer.GetTargetEntity(other));
         }
