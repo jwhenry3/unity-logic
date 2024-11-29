@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 127650058696454708}
   - component: {fileID: 5030715293174518302}
   - component: {fileID: 1309106046878357536}
-  - component: {fileID: 4690454480219842401}
   m_Layer: 0
   m_Name: Terrain
   m_TagString: Walkable
@@ -128,19 +127,6 @@ MonoBehaviour:
   m_MinRegionArea: 2
   m_NavMeshData: {fileID: 23800000, guid: b62d218b6ad7f914894fa8d65b5ac27b, type: 2}
   m_BuildHeightMesh: 0
---- !u!114 &4690454480219842401
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2836498581184486346}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: afcef096cbe5412b8fc4e16d88271a7a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  mainCamera: {fileID: 0}
 --- !u!1 &7873252640443022623
 GameObject:
   m_ObjectHideFlags: 0

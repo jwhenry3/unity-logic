@@ -7,17 +7,12 @@ namespace Src.Logic.Player
     {
         public static Players Instance;
 
-        public List<PlayerControl> list = new();
-        public PlayerControl local;
+        public static readonly List<PlayerControl> List = new();
+        public static PlayerControl Local;
 
         private void Start()
         {
             Instance = this;
-        }
-
-        public static PlayerControl GetLocalPlayer()
-        {
-            return Instance?.local;
         }
     }
 }

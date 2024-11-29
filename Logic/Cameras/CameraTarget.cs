@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 namespace Src.Logic.Cameras
@@ -7,20 +6,17 @@ namespace Src.Logic.Cameras
     {
         public Transform target;
         public Vector3 offset = Vector3.up;
-        public float maxDistance = 5f;
 
         private void Update()
         {
-            if (target)
-            {
-                Vector3 origin = target.position + offset;
-                float distance = ((origin) - transform.position).magnitude;
+            if (!target) return;
 
-                if (distance >= 0.5f)
-                {
-                    transform.position = Vector3.Slerp(transform.position, origin, Time.deltaTime * distance);
-                }
-            }
+            var targetPosition = target.position + offset;
+            var distance = ((targetPosition) - transform.position).magnitude;
+            var magnitude = Time.deltaTime * 4;
+            if (distance >= 1f)
+                magnitude = Time.deltaTime * distance * 2;
+            transform.position = Vector3.Slerp(transform.position, targetPosition, magnitude);
         }
     }
 }

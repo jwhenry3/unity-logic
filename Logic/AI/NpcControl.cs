@@ -1,15 +1,12 @@
+using Src.Logic.Movement;
 using UnityEngine;
-using UnityEngine.AI;
-using UnityEngine.Serialization;
 
 namespace Src.Logic.AI
 {
-    public class NpcControl : MonoBehaviour
+    public class NpcControl : Movable
     {
-        public TargetContainer targetContainer;
+        private TargetContainer _targetContainer;
 
-        public float moveSpeed = 5.0f;
-        public bool canMove = true;
         public bool canChase = true;
         public float chaseDistance = 5.0f;
         public float stopChaseDistance = 1.5f;
@@ -20,88 +17,104 @@ namespace Src.Logic.AI
         public float wanderInterval = 5.0f;
         [SerializeField] private float wanderTimer;
 
-        public NavMeshAgent agent;
         private Vector3 _startingPosition;
 
-        private bool isMoving;
+        private bool _isChasing;
 
-        private void Start()
+        protected override void Start()
         {
-            if (agent == null)
-                agent = GetComponent<NavMeshAgent>();
-            if (targetContainer == null)
-                targetContainer = GetComponent<TargetContainer>();
-            agent.speed = moveSpeed;
+            base.Start();
+
+            _targetContainer = GetComponent<TargetContainer>();
+
             _startingPosition = transform.position;
         }
 
-        private void Update()
+        protected override void Update()
         {
-            isMoving = agent.velocity.magnitude > 0.15f;
-            if (!canMove || !canWander)
+            base.Update();
+
+            UpdateChaseTarget();
+            UpdateChase();
+            UpdateWander();
+        }
+
+        private void UpdateChaseTarget()
+        {
+            // we should clear the chase target
+            if (!canChase || !_targetContainer.target)
             {
-                wanderTimer = 0;
+                chaseTarget = null;
                 return;
             }
 
-            if (canChase)
-            {
-                if (!chaseTarget && targetContainer.target)
-                    chaseTarget = targetContainer.target.transform;
-
-                if (chaseTarget)
-                {
-                    wanderTimer = 0;
-                    UpdateChase();
-                    return;
-                }
-            }
-
-            UpdateWander();
+            // chasing a target, no change
+            if (chaseTarget) return;
+            // set a new chase target
+            chaseTarget = _targetContainer.target.transform;
         }
 
         private void UpdateChase()
         {
-            float distanceFromStart = Vector3.Distance(_startingPosition, chaseTarget.position);
-            float distanceFromTarget = Vector3.Distance(transform.position, chaseTarget.position);
+            // invalid state, do not chase
+            if (!canMove) return;
+            if (!canChase) return;
+            if (!chaseTarget) return;
 
-            if ((distanceFromStart > chaseDistance) && (distanceFromTarget > chaseDistance))
+            // calculate distances and determine if we chase or stop
+            var distanceFromStart = Vector3.Distance(_startingPosition, chaseTarget.position);
+            var distanceFromTarget = Vector3.Distance(transform.position, chaseTarget.position);
+
+            var isOutsideWanderDistance = distanceFromStart > wanderDistance;
+            var hasTargetEscaped = distanceFromTarget > chaseDistance;
+
+            var shouldStopChasing = isOutsideWanderDistance && hasTargetEscaped;
+            var hasReachedTarget = distanceFromTarget <= stopChaseDistance;
+
+            // stop chasing
+            if (shouldStopChasing)
             {
                 chaseTarget = null;
-                agent.isStopped = true;
-                return;
+                _isChasing = false;
             }
 
-            if (distanceFromTarget <= stopChaseDistance)
+            // stop the agent so it does not move
+            if (hasReachedTarget || shouldStopChasing)
             {
-                agent.isStopped = true;
+                Stop();
                 return;
             }
 
+            // move toward the chase target
+            _isChasing = true;
+            wanderTimer = 0;
             MoveTo(chaseTarget.position);
         }
 
         private void UpdateWander()
         {
-            if (!isMoving)
+            // invalid state, do not wander
+            if (!canMove) return;
+            if (_isChasing) return;
+            if (!canWander) return;
+            if (wanderInterval <= Time.deltaTime) return;
+            // increment wander timer if not moving
+            if (!IsMoving())
                 wanderTimer += Time.deltaTime;
-            if (!(wanderTimer >= wanderInterval) || wanderInterval <= Time.deltaTime) return;
+            // do nothing until the timer has met the interval
+            if (wanderTimer < wanderInterval) return;
 
+            // do the wandering
             wanderTimer = 0;
             Wander();
         }
 
-        private void MoveTo(Vector3 location)
-        {
-            agent.isStopped = false;
-            agent.SetDestination(location);
-        }
-
         private void Wander()
         {
-            float distance = Random.Range(0, wanderDistance);
-            float angle = Random.Range(0, 360);
-            Vector3 destination = _startingPosition + new Vector3(Mathf.Cos(angle), Mathf.Sin(angle), 0) * distance;
+            // wander to a random direction within the wander radius
+            var distance = Random.Range(0, wanderDistance);
+            var angle = Random.Range(0, 360);
+            var destination = _startingPosition + new Vector3(Mathf.Cos(angle), Mathf.Sin(angle), 0) * distance;
 
             MoveTo(destination);
         }
