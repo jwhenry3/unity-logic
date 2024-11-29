@@ -1,3 +1,4 @@
+using Src.Logic.AI;
 using Src.Logic.Movement;
 using Src.Logic.Player;
 using UnityEngine;
@@ -5,16 +6,18 @@ using UnityEngine;
 namespace Src.Logic.Interaction
 {
     [RequireComponent(typeof(PlayerControl))]
+    [RequireComponent(typeof(TargetContainer))]
     public class ClickToMoveInteraction : MonoBehaviour
     {
         private PlayerControl _player;
         private Camera _mainCamera;
-
+        private TargetContainer _targetContainer;
         private ClickToMoveTarget _destinationTarget;
 
         private void Start()
         {
             _mainCamera = Camera.main;
+            _targetContainer = GetComponent<TargetContainer>();
             _player = GetComponent<PlayerControl>();
         }
 
@@ -33,6 +36,9 @@ namespace Src.Logic.Interaction
             if (!Physics.Raycast(ray, out var hit)) return;
             _destinationTarget = null;
             var target = hit.transform.GetComponent<ClickToMoveTarget>();
+            var targetReceiver = hit.transform.GetComponent<TargetReceiver>();
+            if (targetReceiver && !targetReceiver.targetedBy.Contains(_targetContainer))
+                return;
             if (target)
                 _destinationTarget = target;
             if (!hit.transform.CompareTag("Walkable"))

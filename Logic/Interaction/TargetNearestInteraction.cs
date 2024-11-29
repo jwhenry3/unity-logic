@@ -17,12 +17,12 @@ namespace Src.Logic.Interaction
         public void OnTriggerEnter(Collider other)
         {
             if (targetContainer.target != null) return;
-            targetContainer.SetTarget(targetContainer.GetTargetEntity(other));
+            targetContainer.SetTarget(other.gameObject);
         }
 
         public void OnTriggerExit(Collider other)
         {
-            targetContainer.UnsetTarget(targetContainer.GetTargetEntity(other));
+            targetContainer.UnsetTarget(other.gameObject);
         }
     }
 }
