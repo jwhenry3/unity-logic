@@ -2,61 +2,55 @@ using Src.Logic.AI;
 using Src.Logic.Movement;
 using Src.Logic.Player;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Src.Logic.Interaction
 {
     [RequireComponent(typeof(PlayerControl))]
     [RequireComponent(typeof(TargetContainer))]
-    public class ClickToMoveInteraction : MonoBehaviour
+    public class ClickToMoveInteraction : BaseTargetClickInteraction
     {
-        private PlayerControl _player;
-        private Camera _mainCamera;
-        private TargetContainer _targetContainer;
-        private ClickToMoveTarget _destinationTarget;
+        public ClickToMoveTarget destinationTarget;
 
-        private void Start()
-        {
-            _mainCamera = Camera.main;
-            _targetContainer = GetComponent<TargetContainer>();
-            _player = GetComponent<PlayerControl>();
-        }
+        private bool _clickedATarget;
 
-        private void Update()
+        protected override void Update()
         {
             // invalid state, do nothing
-            if (!_mainCamera || !Input.GetMouseButtonDown(0))
+            if (!MainCamera || !Input.GetMouseButtonDown(0))
             {
                 MoveToTarget();
                 return;
             }
 
-            // check the mouse position on click
-            var ray = _mainCamera.ScreenPointToRay(Input.mousePosition);
-            // invalid hits, do nothing
-            if (!Physics.Raycast(ray, out var hit)) return;
-            _destinationTarget = null;
-            var target = hit.transform.GetComponent<ClickToMoveTarget>();
-            var targetReceiver = hit.transform.GetComponent<TargetReceiver>();
-            if (targetReceiver && !targetReceiver.targetedBy.Contains(_targetContainer))
-                return;
-            if (target)
-                _destinationTarget = target;
-            if (!hit.transform.CompareTag("Walkable"))
-                return;
+            _clickedATarget = false;
+            base.Update();
+        }
 
-            // move to location of click
-            _player.MoveTo(hit.point);
+        protected override void InteractWithTarget(TargetReceiver targetReceiver)
+        {
+            _clickedATarget = true;
+            var target = targetReceiver.GetComponent<ClickToMoveTarget>();
+            if (target && target.enabled)
+                destinationTarget = target;
+        }
+
+        protected override void InteractWithHit(RaycastHit hit)
+        {
+            if (_clickedATarget) return;
+            if (!hit.transform.CompareTag("Walkable")) return;
+            Player.MoveTo(hit.point);
         }
 
         private void MoveToTarget()
         {
-            if (!_destinationTarget) return;
+            if (!destinationTarget) return;
 
-            var distance = Vector3.Distance(_player.transform.position, _destinationTarget.transform.position);
-            if (distance < _destinationTarget.stopRadius)
-                _player.Stop();
+            var distance = Vector3.Distance(Player.transform.position, destinationTarget.transform.position);
+            if (distance < destinationTarget.stopRadius)
+                Player.Stop();
             else
-                _player.MoveTo(_destinationTarget.transform.position);
+                Player.MoveTo(destinationTarget.transform.position);
         }
     }
 }
