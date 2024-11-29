@@ -1,3 +1,4 @@
+using Src.Logic.Movement;
 using Src.Logic.Player;
 using UnityEngine;
 
@@ -9,6 +10,8 @@ namespace Src.Logic.Interaction
         private PlayerControl _player;
         private Camera _mainCamera;
 
+        private ClickToMoveTarget _destinationTarget;
+
         private void Start()
         {
             _mainCamera = Camera.main;
@@ -18,15 +21,36 @@ namespace Src.Logic.Interaction
         private void Update()
         {
             // invalid state, do nothing
-            if (!_mainCamera || !Input.GetMouseButtonDown(0)) return;
+            if (!_mainCamera || !Input.GetMouseButtonDown(0))
+            {
+                MoveToTarget();
+                return;
+            }
+
             // check the mouse position on click
             var ray = _mainCamera.ScreenPointToRay(Input.mousePosition);
             // invalid hits, do nothing
             if (!Physics.Raycast(ray, out var hit)) return;
-            if (!hit.transform.CompareTag("Walkable")) return;
+            _destinationTarget = null;
+            var target = hit.transform.GetComponent<ClickToMoveTarget>();
+            if (target)
+                _destinationTarget = target;
+            if (!hit.transform.CompareTag("Walkable"))
+                return;
 
             // move to location of click
             _player.MoveTo(hit.point);
+        }
+
+        private void MoveToTarget()
+        {
+            if (!_destinationTarget) return;
+
+            var distance = Vector3.Distance(_player.transform.position, _destinationTarget.transform.position);
+            if (distance < _destinationTarget.stopRadius)
+                _player.Stop();
+            else
+                _player.MoveTo(_destinationTarget.transform.position);
         }
     }
 }

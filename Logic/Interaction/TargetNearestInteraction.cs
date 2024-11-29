@@ -1,27 +1,29 @@
 using Src.Logic.AI;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Src.Logic.Interaction
 {
-    [RequireComponent(typeof(TargetContainer))]
     public class TargetNearestInteraction : MonoBehaviour
     {
-        private TargetContainer _targetContainer;
+        public TargetContainer targetContainer;
 
         private void Start()
         {
-            _targetContainer = GetComponent<TargetContainer>();
+            if (!targetContainer)
+                targetContainer = GetComponent<TargetContainer>();
         }
 
         public void OnTriggerEnter(Collider other)
         {
-            if (_targetContainer.target != null) return;
-            _targetContainer.SetTarget(_targetContainer.GetTargetEntity(other));
+            Debug.Log(other.name);
+            if (targetContainer.target != null) return;
+            targetContainer.SetTarget(targetContainer.GetTargetEntity(other));
         }
 
         public void OnTriggerExit(Collider other)
         {
-            _targetContainer.UnsetTarget(_targetContainer.GetTargetEntity(other));
+            targetContainer.UnsetTarget(targetContainer.GetTargetEntity(other));
         }
     }
 }

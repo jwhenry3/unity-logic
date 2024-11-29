@@ -35,6 +35,7 @@ namespace Src.Logic.AI
 
         public GameObject GetTargetEntity(Component cmp)
         {
+            Debug.Log(cmp.transform);
             var receiver = cmp.GetComponent<TargetReceiver>();
             return !receiver ? null : receiver.entity;
         }
