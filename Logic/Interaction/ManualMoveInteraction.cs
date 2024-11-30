@@ -9,6 +9,7 @@ namespace Src.Logic.Interaction
     public class ManualMoveInteraction : MonoBehaviour
     {
         private PlayerControl _player;
+        private ClickToMoveInteraction _clickToMoveInteraction;
 
         private readonly Dictionary<KeyCode, Vector3> _moveDirections = new()
         {
@@ -21,17 +22,19 @@ namespace Src.Logic.Interaction
         private void Start()
         {
             _player = GetComponent<PlayerControl>();
+            _clickToMoveInteraction = GetComponent<ClickToMoveInteraction>();
         }
 
         private void Update()
         {
+            if (!_player.hasInput) return;
             // construct move direction based off of the key mapping
             var pressedDirections = _moveDirections.Where(entry => Input.GetKey(entry.Key));
             var moveDirection = pressedDirections.Aggregate(Vector3.zero, (current, entry) => current + entry.Value);
 
             // do nothing if we did not press anything
             if (moveDirection == Vector3.zero) return;
-
+            if (_clickToMoveInteraction) _clickToMoveInteraction.destinationTarget = null;
             // move the player in the direction we pressed
             _player.Move(moveDirection.normalized);
         }

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Src.Logic.AI;
 using Src.Logic.Cameras;
+using Src.Logic.Interaction;
 using Src.Logic.Movement;
 using UnityEngine;
 using UnityEngine.AI;
@@ -12,6 +13,7 @@ namespace Src.Logic.Player
     public class PlayerControl : Movable
     {
         private TargetContainer _targetContainer;
+        public bool hasInput;
 
 
         protected override void Start()
@@ -21,6 +23,7 @@ namespace Src.Logic.Player
             _targetContainer = GetComponent<TargetContainer>();
 
             Players.Local = this;
+            hasInput = true;
             Players.List.Add(this);
 
             var cameraTarget = FindFirstObjectByType<CameraTarget>();

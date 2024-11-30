@@ -23,6 +23,7 @@ namespace Src.Logic.Interaction
 
         private void LateUpdate()
         {
+            if (!_player.hasInput) return;
             // invalid state, do nothing
             if (!_mainCamera || !Input.GetMouseButtonDown(0))
                 return;

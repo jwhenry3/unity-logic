@@ -9,7 +9,23 @@ namespace Src.Logic.AI
     {
         public TargetReceiver target;
 
+        private PlayerControl _player;
         public List<string> targetTags = new List<string>();
+
+
+        private void Start()
+        {
+            _player = GetComponent<PlayerControl>();
+        }
+
+        private void Update()
+        {
+            if (!_player) return;
+            if (!_player.hasInput) return;
+            if (target && Input.GetKeyDown(KeyCode.Escape))
+                UnsetTarget(target);
+        }
+
 
         public void SetTarget(GameObject targetEntity)
         {
@@ -36,7 +52,7 @@ namespace Src.Logic.AI
         {
             if (!targetEntity) return;
             if (target != targetEntity) return;
-            
+
             if (target.targetedBy.Contains(this))
                 target.targetedBy.Remove(this);
             target = null;

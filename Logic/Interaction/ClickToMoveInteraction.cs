@@ -24,6 +24,7 @@ namespace Src.Logic.Interaction
             }
 
             _clickedATarget = false;
+            destinationTarget = null;
             base.Update();
         }
 
@@ -44,6 +45,8 @@ namespace Src.Logic.Interaction
 
         private void MoveToTarget()
         {
+            if (!TargetContainer.target)
+                destinationTarget = null;
             if (!destinationTarget) return;
 
             var distance = Vector3.Distance(Player.transform.position, destinationTarget.transform.position);

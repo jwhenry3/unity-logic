@@ -4,37 +4,47 @@ using UnityEngine.AI;
 
 namespace Src.Logic.AI
 {
-    [RequireComponent(typeof(ClickToMoveTarget))]
     public class Door : MonoBehaviour
     {
         private float _doorOpenTime;
         public GameObject visualObject;
         public NavMeshObstacle navMeshObstacle;
         public Collider doorCollider;
+        private bool _isOpen;
 
         public ClickToMoveTarget clickToMoveTarget;
+
         private void Update()
         {
-            clickToMoveTarget.enabled = false;
-            if (navMeshObstacle.enabled) return;
+            if (clickToMoveTarget)
+                clickToMoveTarget.enabled = false;
+            if (!_isOpen) return;
             _doorOpenTime += Time.deltaTime;
 
-            if (_doorOpenTime < 1f) return;
+            if (_doorOpenTime < 0.5f) return;
 
             visualObject.SetActive(true);
-            navMeshObstacle.enabled = true;
-            doorCollider.enabled = true;
+            if (navMeshObstacle)
+                navMeshObstacle.enabled = true;
+            if (navMeshObstacle)
+                navMeshObstacle.carving = true;
+            if (doorCollider)
+                doorCollider.enabled = true;
             _doorOpenTime = 0f;
-            navMeshObstacle.carving = true;
+            _isOpen = false;
         }
 
         public void Open()
         {
-            navMeshObstacle.enabled = false;
-            doorCollider.enabled = false;
+            if (doorCollider)
+                doorCollider.enabled = false;
             visualObject.SetActive(false);
             _doorOpenTime = 0f;
-            navMeshObstacle.carving = false;
+            if (navMeshObstacle)
+                navMeshObstacle.enabled = false;
+            if (navMeshObstacle)
+                navMeshObstacle.carving = false;
+            _isOpen = true;
         }
     }
 }

@@ -22,6 +22,7 @@ namespace Src.Logic.Interaction
 
         protected virtual void Update()
         {
+            if (!Player.hasInput) return;
             // invalid state, do nothing
             if (!MainCamera || !Input.GetMouseButtonDown(0))
                 return;
