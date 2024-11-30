@@ -1,3 +1,4 @@
+using Nova;
 using Src.Logic.AI;
 using Src.Logic.Player;
 using UnityEngine;
@@ -30,6 +31,9 @@ namespace Src.Logic.Interaction
             // check the mouse position on click
             var ray = MainCamera.ScreenPointToRay(Input.mousePosition);
             // invalid hits, do nothing
+            if (Nova.Interaction.Raycast(ray, out var blockHit))
+                if (!blockHit.UIBlock.CompareTag("IgnoreUI"))
+                    return;
             if (!Physics.Raycast(ray, out var hit)) return;
             var targetReceiver = hit.transform.GetComponent<TargetReceiver>();
             if (targetReceiver && targetReceiver.targetedBy.Contains(TargetContainer))

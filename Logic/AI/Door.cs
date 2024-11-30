@@ -12,10 +12,26 @@ namespace Src.Logic.AI
         public Collider doorCollider;
         private bool _isOpen;
 
+        public Vector3 openPosition;
+        public bool disappearOnOpen;
+        private Vector3 _closedPosition;
+
         public ClickToMoveTarget clickToMoveTarget;
+
+        private void Start()
+        {
+            _closedPosition = visualObject.transform.position;
+        }
 
         private void Update()
         {
+            if (_isOpen)
+                visualObject.transform.position = Vector3.Lerp(visualObject.transform.position,
+                    _closedPosition + openPosition, Time.deltaTime * 10f);
+            else
+                visualObject.transform.position = Vector3.Lerp(visualObject.transform.position, _closedPosition,
+                    Time.deltaTime * 10f);
+
             if (clickToMoveTarget)
                 clickToMoveTarget.enabled = false;
             if (!_isOpen) return;
@@ -23,7 +39,7 @@ namespace Src.Logic.AI
 
             if (_doorOpenTime < 0.5f) return;
 
-            visualObject.SetActive(true);
+            if (disappearOnOpen) visualObject.SetActive(true);
             if (navMeshObstacle)
                 navMeshObstacle.enabled = true;
             if (navMeshObstacle)
@@ -38,7 +54,7 @@ namespace Src.Logic.AI
         {
             if (doorCollider)
                 doorCollider.enabled = false;
-            visualObject.SetActive(false);
+            if (disappearOnOpen) visualObject.SetActive(false);
             _doorOpenTime = 0f;
             if (navMeshObstacle)
                 navMeshObstacle.enabled = false;
