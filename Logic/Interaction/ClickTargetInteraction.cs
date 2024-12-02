@@ -1,7 +1,8 @@
-using Nova;
+using System.Collections.Generic;
 using Src.Logic.AI;
 using Src.Logic.Player;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace Src.Logic.Interaction
 {
@@ -28,13 +29,20 @@ namespace Src.Logic.Interaction
             // invalid state, do nothing
             if (!_mainCamera || !Input.GetMouseButtonDown(0))
                 return;
+            
+            PointerEventData pointerData = new(EventSystem.current)
+            {
+                position = Input.mousePosition
+            };
+            List<RaycastResult> hitList = new();
+            EventSystem.current?.RaycastAll(pointerData, hitList);
 
+            // invalid hits, do nothing
+            if (hitList.Count > 0) return;
+            
             // check the mouse position on click
             var ray = _mainCamera.ScreenPointToRay(Input.mousePosition);
             // invalid hits, do nothing
-            if (Nova.Interaction.Raycast(ray, out var blockHit))
-                if (!blockHit.UIBlock.CompareTag("IgnoreUI"))
-                    return;
             if (!Physics.Raycast(ray, out var hit)) return;
             var target = hit.transform.GetComponent<TargetReceiver>();
             if (target)
