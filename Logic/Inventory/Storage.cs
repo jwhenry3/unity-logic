@@ -7,7 +7,7 @@ namespace Src.Logic.Inventory
 {
     public class Storage : MonoBehaviour
     {
-        public string id;
+        public string ID { get; protected set; }
 
         public string owner;
 
@@ -19,7 +19,7 @@ namespace Src.Logic.Inventory
         public event Action OnUpdate;
 
 
-        private void Start()
+        protected virtual void Start()
         {
             itemIds = new string[size];
             amounts = new int[size];
@@ -70,7 +70,7 @@ namespace Src.Logic.Inventory
             indexToAddTo = -1;
             for (var i = 0; i < size; i++)
             {
-                if (itemIds[i] == id || itemIds[i] == null)
+                if (itemIds[i] == ID || itemIds[i] == null)
                 {
                     indexToAddTo = i;
                     break;
