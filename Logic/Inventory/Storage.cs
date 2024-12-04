@@ -16,6 +16,8 @@ namespace Src.Logic.Inventory
         public string[] itemIds;
         public int[] amounts;
 
+        public event Action OnUpdate;
+
 
         private void Start()
         {
@@ -23,17 +25,24 @@ namespace Src.Logic.Inventory
             amounts = new int[size];
         }
 
+        public bool MoveItemTo(Storage toStorage, int fromIndex)
+        {
+            var transaction = StorageTransaction.Create(this, toStorage);
+            return transaction.MoveItem(fromIndex);
+        }
+
         public bool AddItem(string itemId, int amount, int index)
         {
             if (itemIds[index] != itemId && amounts[index] != 0) return false;
             itemIds[index] = itemId;
             amounts[index] += amount;
+            TriggerUpdate();
             return true;
         }
 
-        public bool AddItem(string itemId, int amount)
+        public bool AddItem(string itemId, int amount, out int indexAddedTo)
         {
-            return CanAddItem(itemId, out var indexToAddTo) && AddItem(itemId, amount, indexToAddTo);
+            return CanAddItem(itemId, out indexAddedTo) && AddItem(itemId, amount, indexAddedTo);
         }
 
         public bool RemoveItem(string itemId, int amount, int index)
@@ -42,6 +51,7 @@ namespace Src.Logic.Inventory
             amounts[index] -= amount;
             if (amounts[index] <= 0)
                 itemIds[index] = null;
+            TriggerUpdate();
             return true;
         }
 
@@ -51,6 +61,7 @@ namespace Src.Logic.Inventory
             foreach (var kvp in indexesToAdjust)
                 RemoveItem(itemId, kvp.Value, kvp.Key);
 
+            TriggerUpdate();
             return true;
         }
 
@@ -90,6 +101,40 @@ namespace Src.Logic.Inventory
             }
 
             return remaining == 0;
+        }
+
+        public bool MoveItem(int fromIndex, int toIndex, bool swap = false)
+        {
+            var itemId1 = itemIds[fromIndex];
+            var quantity1 = amounts[fromIndex];
+            var itemId2 = itemIds[toIndex];
+            var quantity2 = amounts[toIndex];
+
+            if (itemId1 == itemId2)
+            {
+                if (quantity1 > 0 && quantity2 > 0 && !swap)
+                {
+                    amounts[fromIndex] = 0;
+                    itemIds[fromIndex] = null;
+
+                    amounts[toIndex] = quantity1 + quantity2;
+                    TriggerUpdate();
+                    return true;
+                }
+            }
+
+            amounts[fromIndex] = quantity2;
+            amounts[toIndex] = quantity1;
+
+            itemIds[fromIndex] = itemId2;
+            itemIds[toIndex] = itemId1;
+            TriggerUpdate();
+            return true;
+        }
+
+        public void TriggerUpdate()
+        {
+            OnUpdate?.Invoke();
         }
     }
 }
